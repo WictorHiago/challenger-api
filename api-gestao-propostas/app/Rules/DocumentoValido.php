@@ -9,7 +9,14 @@ class DocumentoValido implements ValidationRule
 {
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        $digits = preg_replace('/\D/', '', (string) $value);
+        $value = (string) $value;
+
+        if (preg_match('/[^0-9.\-\/\s]/', $value)) {
+            $fail('O campo :attribute deve conter apenas números (CPF ou CNPJ).');
+            return;
+        }
+
+        $digits = preg_replace('/\D/', '', $value);
 
         if (strlen($digits) === 11) {
             if (!$this->cpfValido($digits)) {

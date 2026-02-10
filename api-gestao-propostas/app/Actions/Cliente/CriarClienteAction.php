@@ -23,7 +23,9 @@ class CriarClienteAction
             }
         }
 
-        $cliente = $this->clienteRepository->create($request->only(['nome', 'email', 'documento']));
+        $data = $request->validated();
+        $data['documento'] = preg_replace('/\D/', '', $data['documento']);
+        $cliente = $this->clienteRepository->create($data);
 
         if ($idempotencyKey !== null && $idempotencyKey !== '') {
             $this->clienteRepository->storeIdempotencyKey($idempotencyKey, $cliente->id);
