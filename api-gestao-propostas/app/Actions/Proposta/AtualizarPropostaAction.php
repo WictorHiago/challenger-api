@@ -6,6 +6,7 @@ use App\Contracts\PropostaAuditoriaInterface;
 use App\Contracts\PropostaRepositoryInterface;
 use App\Enums\AuditoriaEvento;
 use App\Enums\PropostaStatus;
+use App\Exceptions\ConflitoVersaoException;
 use App\Models\Proposta;
 use Illuminate\Http\Request;
 
@@ -20,7 +21,7 @@ class AtualizarPropostaAction
     {
         $versaoInformada = (int) $request->input('versao');
         if ($proposta->versao !== $versaoInformada) {
-            throw new \Symfony\Component\HttpKernel\Exception\HttpException(409, 'Conflito de versão. A proposta foi alterada por outro processo.');
+            throw new ConflitoVersaoException();
         }
 
         if ($proposta->status !== PropostaStatus::DRAFT) {

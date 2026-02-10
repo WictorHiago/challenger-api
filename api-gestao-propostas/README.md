@@ -1,59 +1,135 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# API Gestão de Propostas
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+API REST para gestão de clientes e propostas, construída com Laravel 11.
 
-## About Laravel
+## Requisitos
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- PHP 8.3+
+- Composer
+- PostgreSQL 16
+- Redis 7
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Setup
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Opção 1: Docker (recomendado)
 
-## Learning Laravel
+Na raiz do projeto (`challenger-api/`):
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+```bash
+# Subir containers (PostgreSQL, Redis, RedisInsight)
+docker-compose up -d postgres redis redisinsight
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+# O app pode rodar localmente ou via Docker
+# Para rodar o app via Docker:
+docker-compose up -d app
+```
 
-## Laravel Sponsors
+### Opção 2: Local (sem Docker para o app)
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+1. Suba PostgreSQL e Redis (via Docker ou instalados localmente).
 
-### Premium Partners
+2. Copie o `.env` e configure:
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+3. Configure no `.env`:
+```env
+DB_CONNECTION=pgsql
+DB_HOST=127.0.0.1
+DB_PORT=5432
+DB_DATABASE=propostas_db
+DB_USERNAME=propostas_user
+DB_PASSWORD=propostas_pass
 
-## Contributing
+CACHE_STORE=redis
+REDIS_HOST=127.0.0.1
+REDIS_PORT=6379
+REDIS_CLIENT=predis
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+4. Instale dependências e rode migrations:
+```bash
+composer install
+php artisan migrate
+php artisan db:seed
+```
 
-## Code of Conduct
+5. Inicie o servidor:
+```bash
+php artisan serve
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+A API estará em `http://localhost:8000`.
 
-## Security Vulnerabilities
+## Migrations
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```bash
+# Executar migrations
+php artisan migrate
 
-## License
+# Rollback (reverter última migration)
+php artisan migrate:rollback
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+# Status das migrations
+php artisan migrate:status
+```
+
+## Seeders
+
+Popular o banco com dados de teste:
+
+```bash
+php artisan db:seed
+```
+
+Isso cria clientes e propostas de exemplo. Use `firstOrCreate` para evitar duplicatas ao reexecutar.
+
+## Endpoints
+
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| POST | /api/v1/clientes | Criar cliente (Idempotency-Key opcional) |
+| GET | /api/v1/clientes/{id} | Obter cliente |
+| POST | /api/v1/propostas | Criar proposta |
+| GET | /api/v1/propostas | Listar propostas (filtros, paginação) |
+| GET | /api/v1/propostas/{id} | Obter proposta |
+| PATCH | /api/v1/propostas/{id} | Atualizar proposta (versão obrigatória) |
+| POST | /api/v1/propostas/{id}/submit | Submeter proposta |
+| POST | /api/v1/propostas/{id}/approve | Aprovar proposta |
+| POST | /api/v1/propostas/{id}/reject | Rejeitar proposta |
+| POST | /api/v1/propostas/{id}/cancel | Cancelar proposta |
+| GET | /api/v1/propostas/{id}/auditoria | Histórico de auditoria |
+
+### Filtros da listagem de propostas
+
+- `status` — DRAFT, SUBMITTED, APPROVED, REJECTED, CANCELED
+- `cliente_id` — ID do cliente
+- `produto` — Busca parcial (ILIKE)
+- `valor_min` — Valor mensal mínimo
+- `valor_max` — Valor mensal máximo
+- `ordenar_por` — created_at, valor_mensal, produto, etc.
+- `direcao` — asc ou desc
+- `per_page` — Itens por página (máx. 100, default 15)
+
+## Documentação Swagger
+
+Com o servidor rodando, acesse:
+
+```
+http://localhost:8000/api/documentation
+```
+
+## Padrão de erros
+
+Respostas de erro seguem o formato:
+
+```json
+{
+  "message": "Mensagem descritiva",
+  "errors": {}
+}
+```
+
+Códigos HTTP: 400 (validação), 404 (não encontrado), 409 (conflito de versão), 422 (regra de negócio).

@@ -18,6 +18,20 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->render(function (\App\Exceptions\PropostaStatusTransitionException $e) {
-            return response()->json(['message' => $e->getMessage()], 422);
+            return response()->json(['message' => $e->getMessage(), 'errors' => new \stdClass], 422);
+        });
+
+        $exceptions->render(function (\App\Exceptions\ConflitoVersaoException $e) {
+            return response()->json(['message' => $e->getMessage(), 'errors' => new \stdClass], 409);
+        });
+
+        $exceptions->render(function (\Throwable $e, \Illuminate\Http\Request $request) {
+            if ($request->is('api/*') && $request->expectsJson() && $e instanceof \Symfony\Component\HttpKernel\Exception\HttpException) {
+                $status = $e->getStatusCode();
+                return response()->json([
+                    'message' => $e->getMessage() ?: \Symfony\Component\HttpFoundation\Response::$statusTexts[$status] ?? 'Erro',
+                    'errors' => new \stdClass,
+                ], $status);
+            }
         });
     })->create();

@@ -42,7 +42,7 @@ class ClienteController extends Controller
         ),
         responses: [
             new OA\Response(response: 201, description: 'Cliente criado com sucesso', content: new OA\JsonContent(ref: '#/components/schemas/Cliente')),
-            new OA\Response(response: 422, description: 'Erro de validação'),
+            new OA\Response(response: 422, description: 'Erro de validação', content: new OA\JsonContent(ref: '#/components/schemas/Error')),
         ]
     )]
     public function store(StoreClienteRequest $request): JsonResponse
@@ -55,15 +55,15 @@ class ClienteController extends Controller
     }
 
     #[OA\Get(
-        path: '/clientes/{id}',
+        path: '/clientes/{cliente}',
         summary: 'Obter cliente por ID',
         tags: ['Clientes'],
         parameters: [
-            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'cliente', in: 'path', required: true, schema: new OA\Schema(type: 'integer'), description: 'ID do cliente'),
         ],
         responses: [
             new OA\Response(response: 200, description: 'Cliente encontrado', content: new OA\JsonContent(ref: '#/components/schemas/Cliente')),
-            new OA\Response(response: 404, description: 'Cliente não encontrado'),
+            new OA\Response(response: 404, description: 'Cliente não encontrado', content: new OA\JsonContent(ref: '#/components/schemas/Error')),
         ]
     )]
     public function show(Cliente $cliente): ClienteResource

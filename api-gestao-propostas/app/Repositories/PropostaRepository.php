@@ -46,6 +46,12 @@ class PropostaRepository implements PropostaRepositoryInterface
         if (!empty($filters['produto'])) {
             $query->whereRaw('produto ILIKE ?', ['%' . $filters['produto'] . '%']);
         }
+        if (isset($filters['valor_min']) && $filters['valor_min'] !== '' && $filters['valor_min'] !== null) {
+            $query->where('valor_mensal', '>=', (float) $filters['valor_min']);
+        }
+        if (isset($filters['valor_max']) && $filters['valor_max'] !== '' && $filters['valor_max'] !== null) {
+            $query->where('valor_mensal', '<=', (float) $filters['valor_max']);
+        }
 
         $ordenarPor = $filters['ordenar_por'] ?? 'created_at';
         $direcao = $filters['direcao'] ?? 'desc';
