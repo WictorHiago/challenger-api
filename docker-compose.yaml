@@ -1,0 +1,59 @@
+services:
+  app:
+    container_name: propostas_app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    working_dir: /var/www
+    command: php artisan serve --host=0.0.0.0 --port=8000
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./:/var/www
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - propostas_net
+
+  postgres:
+    container_name: propostas_postgres
+    image: postgres:16-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: propostas_db
+      POSTGRES_USER: propostas_user
+      POSTGRES_PASSWORD: propostas_pass
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - propostas_net
+
+  redis:
+    container_name: propostas_redis
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - propostas_net
+
+  redisinsight:
+    image: redis/redisinsight:latest
+    container_name: propostas_redisinsight
+    ports:
+      - "5540:5540"
+    depends_on:
+      - redis
+    networks:
+      - propostas_net
+
+
+networks:
+  propostas_net:
+    driver: bridge
+
+volumes:
+  pgdata:
