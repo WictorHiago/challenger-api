@@ -4,7 +4,7 @@ namespace App\Repositories;
 
 use App\Contracts\ClienteRepositoryInterface;
 use App\Models\Cliente;
-use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Cache; // redis aqui (Cache usa Redis quando CACHE_STORE=redis)
 
 class ClienteRepository implements ClienteRepositoryInterface
 {
@@ -28,7 +28,7 @@ class ClienteRepository implements ClienteRepositoryInterface
 
     public function findByIdempotencyKey(string $key): ?Cliente
     {
-        $clienteId = Cache::get(self::IDEMPOTENCY_CACHE_PREFIX . $key);
+        $clienteId = Cache::get(self::IDEMPOTENCY_CACHE_PREFIX . $key); // redis aqui
 
         if ($clienteId === null) {
             return null;
@@ -39,6 +39,6 @@ class ClienteRepository implements ClienteRepositoryInterface
 
     public function storeIdempotencyKey(string $key, int $clienteId): void
     {
-        Cache::put(self::IDEMPOTENCY_CACHE_PREFIX . $key, $clienteId, self::IDEMPOTENCY_TTL);
+        Cache::put(self::IDEMPOTENCY_CACHE_PREFIX . $key, $clienteId, self::IDEMPOTENCY_TTL); // redis aqui
     }
 }

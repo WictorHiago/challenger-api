@@ -29,4 +29,19 @@ enum PropostaStatus: string
             self::CANCELED => 'Cancelada',
         };
     }
+
+    /** @return list<PropostaStatus> */
+    public function transicoesPermitidas(): array
+    {
+        return match ($this) {
+            self::DRAFT => [self::SUBMITTED],
+            self::SUBMITTED => [self::APPROVED, self::REJECTED, self::CANCELED],
+            self::APPROVED, self::REJECTED, self::CANCELED => [],
+        };
+    }
+
+    public function podeTransicionarPara(PropostaStatus $novoStatus): bool
+    {
+        return in_array($novoStatus, $this->transicoesPermitidas(), true);
+    }
 }

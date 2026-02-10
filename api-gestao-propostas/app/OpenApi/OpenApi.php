@@ -22,6 +22,21 @@ use OpenApi\Attributes as OA;
         new OA\Property(property: 'updated_at', type: 'string', format: 'date-time'),
     ]
 )]
+#[OA\Schema(
+    schema: 'Proposta',
+    title: 'Proposta',
+    properties: [
+        new OA\Property(property: 'id', type: 'integer', example: 1),
+        new OA\Property(property: 'cliente_id', type: 'integer', example: 1),
+        new OA\Property(property: 'produto', type: 'string', example: 'Seguro Auto'),
+        new OA\Property(property: 'valor_mensal', type: 'number', format: 'float', example: 150.00),
+        new OA\Property(property: 'status', type: 'string', enum: ['DRAFT', 'SUBMITTED', 'APPROVED', 'REJECTED', 'CANCELED']),
+        new OA\Property(property: 'origem', type: 'string', enum: ['APP', 'SITE', 'API']),
+        new OA\Property(property: 'versao', type: 'integer', example: 1),
+        new OA\Property(property: 'created_at', type: 'string', format: 'date-time'),
+        new OA\Property(property: 'updated_at', type: 'string', format: 'date-time'),
+    ]
+)]
 class OpenApi
 {
 }

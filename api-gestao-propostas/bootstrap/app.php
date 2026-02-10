@@ -12,8 +12,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        $middleware->alias([
+            'idempotency.cliente' => \App\Http\Middleware\IdempotencyClienteMiddleware::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->render(function (\App\Exceptions\PropostaStatusTransitionException $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        });
     })->create();
