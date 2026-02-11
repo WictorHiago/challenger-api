@@ -44,7 +44,7 @@ class PropostaRepository implements PropostaRepositoryInterface
             $query->where('cliente_id', $filters['cliente_id']);
         }
         if (!empty($filters['produto'])) {
-            $query->whereRaw('produto ILIKE ?', ['%' . $filters['produto'] . '%']);
+            $query->whereRaw('LOWER(produto) LIKE ?', ['%' . mb_strtolower($filters['produto']) . '%']);
         }
         if (isset($filters['valor_min']) && $filters['valor_min'] !== '' && $filters['valor_min'] !== null) {
             $query->where('valor_mensal', '>=', (float) $filters['valor_min']);
