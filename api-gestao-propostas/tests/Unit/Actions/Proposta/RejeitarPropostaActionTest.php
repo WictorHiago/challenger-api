@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Actions\Proposta;
 
-use App\Actions\Proposta\AprovarPropostaAction;
+use App\Actions\Proposta\RejeitarPropostaAction;
 use App\Contracts\PropostaAuditoriaInterface;
 use App\Contracts\PropostaRepositoryInterface;
 use App\Enums\AuditoriaEvento;
@@ -15,7 +15,7 @@ use PHPUnit\Framework\Attributes\Group;
 use Tests\TestCase;
 
 #[Group('transicao-status')]
-class AprovarPropostaActionTest extends TestCase
+class RejeitarPropostaActionTest extends TestCase
 {
     protected function tearDown(): void
     {
@@ -23,39 +23,39 @@ class AprovarPropostaActionTest extends TestCase
         parent::tearDown();
     }
 
-    public function test_proposta_submitted_aprova_com_sucesso(): void
+    public function test_proposta_submitted_rejeita_com_sucesso(): void
     {
         $proposta = $this->criarProposta(versao: 1, status: PropostaStatus::SUBMITTED);
-        $propostaAprovada = $this->criarProposta(id: 1, versao: 2, status: PropostaStatus::APPROVED);
-        $propostaAprovada = $this->mockLoadCliente($propostaAprovada);
+        $propostaRejeitada = $this->criarProposta(id: 1, versao: 2, status: PropostaStatus::REJECTED);
+        $propostaRejeitada = $this->mockLoadCliente($propostaRejeitada);
 
         $repository = Mockery::mock(PropostaRepositoryInterface::class);
         $repository->shouldReceive('update')
             ->once()
             ->with(Mockery::on(fn ($p) => $p->status === PropostaStatus::SUBMITTED), [
-                'status' => PropostaStatus::APPROVED,
+                'status' => PropostaStatus::REJECTED,
                 'versao' => 2,
             ])
-            ->andReturn($propostaAprovada);
+            ->andReturn($propostaRejeitada);
 
         $auditoria = Mockery::mock(PropostaAuditoriaInterface::class);
         $auditoria->shouldReceive('registrar')
             ->once()
             ->with(
-                $propostaAprovada,
+                $propostaRejeitada,
                 AuditoriaEvento::STATUS_CHANGED,
-                ['de' => 'SUBMITTED', 'para' => 'APPROVED'],
+                ['de' => 'SUBMITTED', 'para' => 'REJECTED'],
                 'system'
             );
 
-        $action = new AprovarPropostaAction($repository, $auditoria);
+        $action = new RejeitarPropostaAction($repository, $auditoria);
 
         $resultado = $action->execute($proposta);
 
-        $this->assertSame($propostaAprovada, $resultado);
+        $this->assertSame($propostaRejeitada, $resultado);
     }
 
-    public function test_proposta_draft_lanca_exception_ao_aprovar(): void
+    public function test_proposta_draft_lanca_exception_ao_rejeitar(): void
     {
         $proposta = $this->criarProposta(status: PropostaStatus::DRAFT);
 
@@ -64,15 +64,15 @@ class AprovarPropostaActionTest extends TestCase
         $auditoria = Mockery::mock(PropostaAuditoriaInterface::class);
         $auditoria->shouldNotReceive('registrar');
 
-        $action = new AprovarPropostaAction($repository, $auditoria);
+        $action = new RejeitarPropostaAction($repository, $auditoria);
 
         $this->expectException(PropostaStatusTransitionException::class);
-        $this->expectExceptionMessage('Transição inválida de DRAFT para APPROVED');
+        $this->expectExceptionMessage('Transição inválida de DRAFT para REJECTED');
 
         $action->execute($proposta);
     }
 
-    public function test_proposta_approved_lanca_exception_ao_aprovar_novamente(): void
+    public function test_proposta_approved_lanca_exception_ao_rejeitar(): void
     {
         $proposta = $this->criarProposta(status: PropostaStatus::APPROVED);
 
@@ -81,7 +81,7 @@ class AprovarPropostaActionTest extends TestCase
         $auditoria = Mockery::mock(PropostaAuditoriaInterface::class);
         $auditoria->shouldNotReceive('registrar');
 
-        $action = new AprovarPropostaAction($repository, $auditoria);
+        $action = new RejeitarPropostaAction($repository, $auditoria);
 
         $this->expectException(PropostaStatusTransitionException::class);
         $this->expectExceptionMessage('Proposta em estado final');

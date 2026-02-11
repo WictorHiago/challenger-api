@@ -2,6 +2,24 @@
 
 API REST para gestão de clientes e propostas, construída com Laravel 12.
 
+![PHP](https://img.shields.io/badge/PHP-8.3+-777BB4?style=flat-square&logo=php)
+![Laravel](https://img.shields.io/badge/Laravel-12-FF2D20?style=flat-square&logo=laravel)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?style=flat-square&logo=postgresql)
+![Redis](https://img.shields.io/badge/Redis-7-DC382D?style=flat-square&logo=redis)
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker)
+![Swagger](https://img.shields.io/badge/Swagger-OpenAPI%203.0-85EA2D?style=flat-square&logo=swagger)
+![Tests](https://img.shields.io/badge/Tests-PHPUnit-3776AB?style=flat-square&logo=php)
+
+## Preview
+
+| Documentação Swagger | Redis (Idempotency) |
+|:---:|:---:|
+| ![Swagger](shots/2image.png) | ![Redis](shots/4image.png) |
+
+| API em ação | Testes |
+|:---:|:---:|
+| ![API](shots/3image.png) | ![Tests](shots/1image.png) |
+
 ## Requisitos
 
 - PHP 8.3+
@@ -28,13 +46,10 @@ php artisan db:seed
 ```bash
 php artisan serve
 ```
-redis://default@redis:6379
-A API estará em `http://localhost:8000`.
 
-Swagger em: `http://localhost:8000/api/documentation`
-
-Redis em: `http://localhost:5540` | Conexão Redis: redis://default@redis:6379 <br>
-Alternar db0 para db1
+- **API:** `http://localhost:8000`
+- **Swagger:** `http://localhost:8000/api/documentation`
+- **Redis UI:** `http://localhost:5540` | Conexão: `redis://default@redis:6379` (alternar db0 para db1)
 
 ## Migrations
 
@@ -87,7 +102,7 @@ php artisan db:seed
 
 ## Documentação Swagger
 
-Com o servidor rodando, acesse:
+A API conta com documentação interativa via Swagger (OpenAPI 3.0). Com o servidor rodando, acesse:
 
 ```
 http://localhost:8000/api/documentation
@@ -105,3 +120,38 @@ Respostas de erro seguem o formato:
 ```
 
 Códigos HTTP: 400 (validação), 404 (não encontrado), 409 (conflito de versão), 422 (regra de negócio).
+
+## Testes Automatizados
+
+### Grupos de teste
+
+| Grupo | Descrição |
+|-------|-----------|
+| `transicao-status` | Transições válidas e inválidas de status (DRAFT→SUBMITTED→APPROVED/REJECTED/CANCELED) |
+| `idempotencia` | Idempotency-Key em clientes e submit de propostas — mesma chave retorna o mesmo recurso |
+| `conflito-versao` | Optimistic lock — PATCH com versão desatualizada retorna 409 |
+| `busca-filtros` | Filtros (status, cliente_id, produto, valor_min/max), ordenação e paginação |
+
+### Comandos
+
+```bash
+# Por categoria
+php artisan test --group=transicao-status
+php artisan test --group=idempotencia
+php artisan test --group=conflito-versao
+php artisan test --group=busca-filtros
+
+# Todos os testes do desafio
+php artisan test --group=transicao-status --group=idempotencia --group=conflito-versao --group=busca-filtros
+
+# Todos os testes
+php artisan test
+```
+
+### Cobertura
+
+- **CriarClienteActionTest** — Idempotência (retorna existente, cria e armazena chave), normalização de documento
+- **SubmeterPropostaActionTest** — Transições de status, idempotência no submit
+- **AtualizarPropostaActionTest** — Conflito de versão (409), edição apenas em DRAFT
+- **PropostaRepositoryTest** — Filtros (status, cliente_id, produto, valor_min/max), ordenação, paginação, eager loading de cliente
+

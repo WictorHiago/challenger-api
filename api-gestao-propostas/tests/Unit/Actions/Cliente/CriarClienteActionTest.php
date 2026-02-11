@@ -2,16 +2,15 @@
 
 namespace Tests\Unit\Actions\Cliente;
 
-/**
- * @group idempotencia
- */
 use App\Actions\Cliente\CriarClienteAction;
 use App\Contracts\ClienteRepositoryInterface;
 use App\Models\Cliente;
 use Illuminate\Http\Request;
 use Mockery;
+use PHPUnit\Framework\Attributes\Group;
 use Tests\TestCase;
 
+#[Group('idempotencia')]
 class CriarClienteActionTest extends TestCase
 {
     protected function tearDown(): void

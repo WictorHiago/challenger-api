@@ -2,9 +2,6 @@
 
 namespace Tests\Unit\Actions\Proposta;
 
-/**
- * @group conflito-versao
- */
 use App\Actions\Proposta\AtualizarPropostaAction;
 use App\Contracts\PropostaAuditoriaInterface;
 use App\Contracts\PropostaRepositoryInterface;
@@ -15,9 +12,11 @@ use App\Exceptions\ConflitoVersaoException;
 use App\Models\Proposta;
 use Illuminate\Http\Request;
 use Mockery;
+use PHPUnit\Framework\Attributes\Group;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Tests\TestCase;
 
+#[Group('conflito-versao')]
 class AtualizarPropostaActionTest extends TestCase
 {
     protected function tearDown(): void
