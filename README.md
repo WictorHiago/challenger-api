@@ -39,8 +39,13 @@ docker compose up -d
 2. Instale dependências e rode migrations:
 ```bash
 composer install
+
 php artisan migrate
+docker exec -it propostas_app php artisan migrate
+
 php artisan db:seed
+docker exec -it propostas_app php artisan db:seed
+
 ```
 3. Inicie o servidor:
 ```bash
