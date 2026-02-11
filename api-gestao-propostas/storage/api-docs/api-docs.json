@@ -360,6 +360,39 @@
                     }
                 }
             },
+            "delete": {
+                "tags": [
+                    "Propostas"
+                ],
+                "summary": "Excluir proposta (soft delete)",
+                "description": "Exclusão lógica: marca deleted_at e registra evento DELETED_LOGICAL na auditoria. GET na proposta excluída retorna 404.",
+                "operationId": "c8225a5b6b961f83dfb1225eb3df2e8e",
+                "parameters": [
+                    {
+                        "name": "proposta",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Proposta excluída com sucesso"
+                    },
+                    "404": {
+                        "description": "Proposta não encontrada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
             "patch": {
                 "tags": [
                     "Propostas"

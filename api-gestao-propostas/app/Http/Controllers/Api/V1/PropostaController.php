@@ -7,6 +7,7 @@ use OpenApi\Attributes as OA;
 use App\Actions\Proposta\AtualizarPropostaAction;
 use App\Actions\Proposta\CancelarPropostaAction;
 use App\Actions\Proposta\CriarPropostaAction;
+use App\Actions\Proposta\ExcluirPropostaAction;
 use App\Actions\Proposta\RejeitarPropostaAction;
 use App\Actions\Proposta\SubmeterPropostaAction;
 use App\Http\Controllers\Controller;
@@ -28,6 +29,7 @@ class PropostaController extends Controller
         private readonly AprovarPropostaAction $aprovarPropostaAction,
         private readonly RejeitarPropostaAction $rejeitarPropostaAction,
         private readonly CancelarPropostaAction $cancelarPropostaAction,
+        private readonly ExcluirPropostaAction $excluirPropostaAction,
         private readonly PropostaRepositoryInterface $propostaRepository
     ) {}
 
@@ -172,6 +174,23 @@ class PropostaController extends Controller
     {
         $proposta = $this->cancelarPropostaAction->execute($proposta);
         return new PropostaResource($proposta);
+    }
+
+    #[OA\Delete(
+        path: '/propostas/{proposta}',
+        summary: 'Excluir proposta (soft delete)',
+        description: 'Exclusão lógica: marca deleted_at e registra evento DELETED_LOGICAL na auditoria. GET na proposta excluída retorna 404.',
+        tags: ['Propostas'],
+        parameters: [new OA\Parameter(name: 'proposta', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))],
+        responses: [
+            new OA\Response(response: 204, description: 'Proposta excluída com sucesso'),
+            new OA\Response(response: 404, description: 'Proposta não encontrada', content: new OA\JsonContent(ref: '#/components/schemas/Error')),
+        ]
+    )]
+    public function destroy(Proposta $proposta): JsonResponse
+    {
+        $this->excluirPropostaAction->execute($proposta);
+        return response()->json(null, 204);
     }
 
     #[OA\Get(

@@ -12,6 +12,7 @@ Route::prefix('v1')->group(function () {
     Route::post('propostas', [PropostaController::class, 'store']);
     Route::get('propostas/{proposta}', [PropostaController::class, 'show']);
     Route::patch('propostas/{proposta}', [PropostaController::class, 'update']);
+    Route::delete('propostas/{proposta}', [PropostaController::class, 'destroy']);
     Route::post('propostas/{proposta}/submit', [PropostaController::class, 'submit']);
     Route::post('propostas/{proposta}/approve', [PropostaController::class, 'approve']);
     Route::post('propostas/{proposta}/reject', [PropostaController::class, 'reject']);
